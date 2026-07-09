@@ -74,7 +74,8 @@ def handle_user_queries(user_question):
     #print and format LLM's output
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
-            st.write(
+            user_template.replace
+            st.write()
     
 
 
