@@ -25,10 +25,10 @@ def handle_user_query(user_question):
                 }
             },
         )
+    return response["answer"]
     
-histories = {}
-
 def get_session_history(session_id: str) -> InMemoryChatMessageHistory:
+    histories = st.session_state.histories
     if session_id not in histories:
         histories[session_id] = InMemoryChatMessageHistory()
 
@@ -53,7 +53,7 @@ def get_chunks_from_text(text):
     # what does a splitter requires ?
         # infos on how to split: separator, chunk size, chunk_overlap, etc..
     text_splitter = RecursiveCharacterTextSplitter(
-        separator="\n",
+        separators=["\n", "\n\n", " ", ""],
         chunk_size=1000,
         chunk_overlap=200,
         length_function=len
@@ -168,12 +168,16 @@ def main():
         st.session_state.conversation = None
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
+    if "histories" not in st.session_state:
+        st.session_state.histories = {}
 
 
     # take user input
     user_question = st.text_input("Ask question to your PDFs")
     if user_question:
-        handle_user_query(user_question)
+        answer = handle_user_query(user_question)
+        if answer:
+            st.write(answer)
 
     with st.sidebar:
         st.subheader("Your documents")
@@ -196,7 +200,7 @@ def main():
                 vectorstore = get_vectorstore(chunks)
 
                 #create a conversation chain
-                conversation_chain = get_conversation_chain(vectorstore)
+                st.session_state.conversation = get_conversation_chain(vectorstore)
 
 if __name__ == "__main__":
     main()
